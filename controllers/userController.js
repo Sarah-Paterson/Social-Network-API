@@ -1,11 +1,28 @@
 const { User, Thought } = require('../models');
 
+// Number of friends
+const friendCount = async (user, count = 0) => {
+  if (user.freinds.length === 0) {
+    return 1;
+  }
+  for (const friend of user.freinds) {
+    numberOfFriends += friendCount(friend, count);
+  }
+  return numberOfFriends;
+}
+
 module.exports = {
   // Get all users
   async getUsers(req, res) {
     try {
       const users = await User.find();
-      res.json(users);
+
+      const userObj = {
+        users,
+        friendCount: await friendCount(),
+      };
+
+      res.json(userObj);
     } catch (err) {
       res.status(500).json(err);
     }
