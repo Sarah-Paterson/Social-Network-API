@@ -47,7 +47,36 @@ module.exports = {
       res.status(500).json(err);
     }
   },
-  // Delete a thought and remove them from the course
+  
+  // update a thought
+  async updateThought(req, res) {
+    try {
+      const thought = await Thought.findOneAndUpdate({ _id: req.params.thoughtId });
+
+      if (!thought) {
+        return res.status(404).json({ message: 'No such thought exists' });
+      }
+
+      const user = await User.findOneAndUpdate(
+        { thoughts: req.params.thoughtId },
+        { $update: { thoughts: req.params.thoughtId } },
+        { new: true }
+      );
+
+      if (!user) {
+        return res.status(404).json({
+          message: 'thought updated, but no users found',
+        });
+      }
+
+      res.json({ message: 'thought successfully updated' });
+    } catch (err) {
+      console.log(err);
+      res.status(500).json(err);
+    }
+  },
+
+  // Delete a thought and remove them from the user
   async deleteThought(req, res) {
     try {
       const thought = await Thought.findOneAndRemove({ _id: req.params.thoughtId });
@@ -56,15 +85,15 @@ module.exports = {
         return res.status(404).json({ message: 'No such thought exists' });
       }
 
-      const course = await User.findOneAndUpdate(
+      const user = await User.findOneAndUpdate(
         { thoughts: req.params.thoughtId },
         { $pull: { thoughts: req.params.thoughtId } },
         { new: true }
       );
 
-      if (!course) {
+      if (!user) {
         return res.status(404).json({
-          message: 'thought deleted, but no courses found',
+          message: 'thought deleted, but no users found',
         });
       }
 
