@@ -1,28 +1,56 @@
 const { User, Thought } = require('../models');
 
 // Number of friends
-const friendCount = async (user, count = 0) => {
-  if (user.freinds.length === 0) {
-    return 1;
-  }
-  for (const friend of user.freinds) {
-    numberOfFriends += friendCount(friend, count);
-  }
-  return numberOfFriends;
-}
+// const friendCount = async (user, count = 0) => {
+//   if (user.freinds.length === 0) {
+//     return 1;
+//   }
+//   for (const friend of user.freinds) {
+//     numberOfFriends += friendCount(friend, count);
+//   }
+//   return numberOfFriends;
+// }
+
+// Aggregate function to get the number of students overall
+// const friendCount = async () => {
+//   const numberOfStudents = await Student.aggregate()
+//     .count('studentCount');
+//   return numberOfStudents;
+// }
+
+// // Aggregate function for getting the overall grade using $avg
+// const grade = async (studentId) =>
+//   Student.aggregate([
+//     // only include the given student by using $match
+//     { $match: { _id: new ObjectId(studentId) } },
+//     {
+//       $unwind: '$assignments',
+//     },
+//     {
+//       $group: {
+//         _id: new ObjectId(studentId),
+//         overallGrade: { $avg: '$assignments.score' },
+//       },
+//     },
+// ]);
 
 module.exports = {
   // Get all users
   async getUsers(req, res) {
+    console.log("getUser is ACTIVATED!")
     try {
-      const users = await User.find();
+      const users = await User.find()
+      .populate('friends')
+      .populate('thoughts');
+      console.log(users);
 
-      const userObj = {
-        users,
-        friendCount: await friendCount(),
-      };
+      // const userObj = {
+      //   users,
+      //   friendCount: await friendCount(),
+      // };
+      // console.log(userObj)
 
-      res.json(userObj);
+      res.json(users);
     } catch (err) {
       res.status(500).json(err);
     }
@@ -93,7 +121,7 @@ module.exports = {
     try {
       const user = await User.findOneAndUpdate(
         { _id: req.params.userId },
-        { $addToSet: { friends: req.body } },
+        { $addToSet: { friends: req.params.friendId } },
         { runValidators: true, new: true }
       );
 

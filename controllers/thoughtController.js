@@ -10,7 +10,7 @@ const reactionCount = async () => {
 
 module.exports = {
   // Get all thoughts
-  async getThought(req, res) {
+  async getThoughts(req, res) {
     try {
       const thoughts = await Thought.find();
 
@@ -36,8 +36,7 @@ module.exports = {
       }
 
       res.json({
-        thought,
-        grade: await grade(req.params.thoughtId),
+        thought
       });
     } catch (err) {
       console.log(err);
@@ -57,7 +56,9 @@ module.exports = {
   // update a thought
   async updateThought(req, res) {
     try {
-      const thought = await Thought.findOneAndUpdate({ _id: req.params.thoughtId });
+      const thought = await Thought.findOneAndUpdate(
+        { _id: req.params.thoughtId },
+        { new: true });
 
       if (!thought) {
         return res.status(404).json({ message: 'No such thought exists' });
