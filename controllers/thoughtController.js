@@ -1,25 +1,14 @@
-const { ObjectId } = require('mongoose').Types;
+// const { ObjectId } = require('mongoose').Types;
 const { User, Thought } = require('../models');
 
-// Aggregate function to get the number of thoughts
-const reactionCount = async () => {
-  const numberOfThoughts = await Thought.aggregate()
-    .count('thoughtCount');
-  return numberOfThoughts;
-}
 
 module.exports = {
   // Get all thoughts
   async getThoughts(req, res) {
     try {
-      const thoughts = await Thought.find();
+      const thoughts = await Thought.find( {}, {"reactions._id": 0} );
 
-      const thoughtObj = {
-        thoughts,
-        reactionCount: await reactionCount(),
-      };
-
-      res.json(thoughtObj);
+      res.json(thoughts);
     } catch (err) {
       console.log(err);
       return res.status(500).json(err);
@@ -28,16 +17,13 @@ module.exports = {
   // Get a single thought
   async getSingleThought(req, res) {
     try {
-      const thought = await Thought.findOne({ _id: req.params.thoughtId })
-        .select('-__v');
+      const thought = await Thought.findOne({ _id: req.params.thoughtId }, {"reactions._id": 0});
 
       if (!thought) {
         return res.status(404).json({ message: 'No thought with that ID' })
       }
 
-      res.json({
-        thought
-      });
+      res.json({ thought });
     } catch (err) {
       console.log(err);
       return res.status(500).json(err);
@@ -47,6 +33,13 @@ module.exports = {
   async createThought(req, res) {
     try {
       const thought = await Thought.create(req.body);
+
+      const user = await User.findOneAndUpdate(
+        { username: req.body.username },
+        { $push: { thoughts: thought._id } },
+        { new: true }
+      );
+
       res.json(thought);
     } catch (err) {
       res.status(500).json(err);
@@ -58,22 +51,10 @@ module.exports = {
     try {
       const thought = await Thought.findOneAndUpdate(
         { _id: req.params.thoughtId },
-        { new: true });
+        { new: true, fields: {"reactions._id": 0} });
 
       if (!thought) {
         return res.status(404).json({ message: 'No such thought exists' });
-      }
-
-      const user = await User.findOneAndUpdate(
-        { thoughts: req.params.thoughtId },
-        { $update: { thoughts: req.params.thoughtId } },
-        { new: true }
-      );
-
-      if (!user) {
-        return res.status(404).json({
-          message: 'thought updated, but no users found',
-        });
       }
 
       res.json({ message: 'thought successfully updated' });
@@ -120,7 +101,7 @@ module.exports = {
       const thought = await Thought.findOneAndUpdate(
         { _id: req.params.thoughtId },
         { $addToSet: { reactions: req.body } },
-        { runValidators: true, new: true }
+        { runValidators: true, new: true, fields: {"reactions._id": 0} }
       );
 
       if (!thought) {
@@ -139,7 +120,7 @@ module.exports = {
     try {
       const thought = await Thought.findOneAndUpdate(
         { _id: req.params.thoughtId },
-        { $pull: { reaction: { reactionId: req.params.reactionId } } },
+        { $pull: { reactions: { reactionId: req.params.reactionId } } },
         { runValidators: true, new: true }
       );
 
