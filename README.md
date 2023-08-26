@@ -6,7 +6,7 @@ In this project, I worked to create the backend of a social network with NoSQL. 
 
 This backend program was created so that the server would be synced to the MongoDB database with Mongoose models. Using insomnia to show the functionality, I can open the api GET routes for users and thoughts, then the data for each of the routes is displayed in a JSON format. I am also able to create, update, and delete users and thoughts in the database. From here I can test out the POST and DELETE routes in insomnia to create and delete reactions to thoughts and add and remove friends to a user’s friend list.
 
-[Here is a link to the walkthrough video]()!
+[Here is a link to the walkthrough video](https://youtu.be/DcqRoyqMK8A)!
 
 ---
 ---
