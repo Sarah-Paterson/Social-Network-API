@@ -39,16 +39,7 @@ module.exports = {
   async getUsers(req, res) {
     console.log("getUser is ACTIVATED!")
     try {
-      const users = await User.find()
-      .populate('friends')
-      .populate('thoughts');
-      console.log(users);
-
-      // const userObj = {
-      //   users,
-      //   friendCount: await friendCount(),
-      // };
-      // console.log(userObj)
+      const users = await User.find();
 
       res.json(users);
     } catch (err) {
@@ -114,7 +105,7 @@ module.exports = {
   },
   // Add an friend to a user
   async addFriend(req, res) {
-    console.log('You are adding an friend');
+    console.log('You are adding a friend');
     console.log(req.body);
 
     try {
@@ -140,7 +131,7 @@ module.exports = {
     try {
       const user = await User.findOneAndUpdate(
         { _id: req.params.userId },
-        { $pull: { friend: { friendId: req.params.friendId } } },
+        { $pull: { friends: req.params.friendId } },
         { runValidators: true, new: true }
       );
 
